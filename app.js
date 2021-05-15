@@ -1,5 +1,6 @@
 const dotenv = require('dotenv');
 const express = require('express');
+const errorHandler = require('errorhandler');
 const path = require('path');
 const port = 3000;
 
@@ -27,6 +28,8 @@ const handleLinkResolver = (doc) => {
   //   // Default to homepage
   //   return '/';
 };
+
+app.use(errorHandler());
 
 // Middleware to inject prismic context
 app.use((req, res, next) => {

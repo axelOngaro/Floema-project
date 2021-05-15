@@ -65,7 +65,6 @@ app.get('/detail/:uid', async (req, res) => {
   const product = await api.getByUID('product', req.params.uid, {
     fetchLinks: 'collection.title',
   });
-  console.log(product.data);
 
   res.render('pages/detail', {
     metadata,
@@ -73,7 +72,24 @@ app.get('/detail/:uid', async (req, res) => {
   });
 });
 app.get('/collections', async (req, res) => {
-  res.render('pages/collections');
+  const api = await initApi(req);
+  const metadata = await api.getSingle('metadata');
+  const home = await api.getSingle('home');
+
+  const { results: collections } = await api.query(
+    Prismic.Predicates.at('document.type', 'collection'),
+    {
+      fetchLinks: 'product.image',
+    }
+  );
+
+  console.log(collections);
+
+  res.render('pages/collections', {
+    metadata,
+    collections,
+    home,
+  });
 });
 
 app.listen(port, () => {

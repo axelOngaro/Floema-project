@@ -1,8 +1,17 @@
 const dotenv = require('dotenv');
 const express = require('express');
 const errorHandler = require('errorhandler');
+const bodyParser = require('body-parser');
+const methodOverride = require('method-override');
+const logger = require('morgan');
 const path = require('path');
 const port = 3000;
+
+app.use(logger('dev'));
+app.use(errorHandler());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(methodOverride());
 
 const Prismic = require('@prismicio/client');
 var PrismicDOM = require('prismic-dom');
@@ -29,8 +38,6 @@ const handleLinkResolver = (doc) => {
   //   return '/';
 };
 
-app.use(errorHandler());
-
 // Middleware to inject prismic context
 app.use((req, res, next) => {
   res.locals.ctx = {
@@ -50,17 +57,20 @@ app.get('/', async (req, res) => {
 
 app.get('/about', async (req, res) => {
   const api = await initApi(req);
+  const preloader = await api.getSingle('preloader');
   const about = await api.getSingle('about');
   const metadata = await api.getSingle('metadata');
 
   res.render('pages/about', {
     about,
     metadata,
+    preloader,
   });
 });
 
 app.get('/detail/:uid', async (req, res) => {
   const api = await initApi(req);
+  const preloader = await api.getSingle('preloader');
   const metadata = await api.getSingle('metadata');
   const product = await api.getByUID('product', req.params.uid, {
     fetchLinks: 'collection.title',
@@ -68,11 +78,13 @@ app.get('/detail/:uid', async (req, res) => {
 
   res.render('pages/detail', {
     metadata,
+    preloader,
     product,
   });
 });
 app.get('/collections', async (req, res) => {
   const api = await initApi(req);
+  const preloader = await api.getSingle('preloader');
   const metadata = await api.getSingle('metadata');
   const home = await api.getSingle('home');
 
@@ -89,6 +101,7 @@ app.get('/collections', async (req, res) => {
     metadata,
     collections,
     home,
+    preloader,
   });
 });
 
